@@ -7,7 +7,6 @@ import { format, subDays, startOfWeek, eachDayOfInterval } from 'date-fns';
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/layout';
 import { useRoutineStore } from '@/stores/routineStore';
-import { progressRepo } from '@/db/repositories/progressRepo';
 import { routineRepo } from '@/db/repositories/routineRepo';
 import { calculateStreak, calculateLongestStreak } from '@/utils/streak';
 import { isScheduledOn } from '@/utils/recurrence';
@@ -29,17 +28,30 @@ export default function ProgressScreen() {
     return eachDayOfInterval({ start, end: subDays(today, 0) }).slice(0, 7);
   }, []);
 
+  const allCompletions = useMemo(() => {
+    const map: Record<string, Set<string>> = {};
+    for (const r of routines) {
+      const cs = routineRepo.getCompletionsForRoutine(r.id);
+      for (const c of cs) {
+        if (!map[c.completedDate]) map[c.completedDate] = new Set();
+        map[c.completedDate].add(r.id);
+      }
+    }
+    return map;
+  }, [routines]);
+
   const weekStats = useMemo(() => {
+    const DAY_LABELS = ['月', '火', '水', '木', '金', '土', '日'];
     return weekDays.map((d) => {
       const dateStr = format(d, 'yyyy-MM-dd');
-      const ach = progressRepo.getDailyAchievement(dateStr);
-      return {
-        label: ['月', '火', '水', '木', '金', '土', '日'][d.getDay() === 0 ? 6 : d.getDay() - 1],
-        value: Math.round((ach?.achievementRate ?? 0) * 100),
-        frontColor: Colors.primary,
-      };
+      const scheduled = routines.filter((r) => isScheduledOn(r, d));
+      const doneIds = allCompletions[dateStr] ?? new Set<string>();
+      const done = scheduled.filter((r) => doneIds.has(r.id)).length;
+      const rate = scheduled.length > 0 ? done / scheduled.length : 0;
+      const dayIndex = d.getDay() === 0 ? 6 : d.getDay() - 1;
+      return { label: DAY_LABELS[dayIndex], value: Math.round(rate * 100), frontColor: Colors.primary };
     });
-  }, [weekDays]);
+  }, [weekDays, routines, allCompletions]);
 
   const streakData = useMemo(() => {
     return routines

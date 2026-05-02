@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 import { Colors } from '@/constants/colors';
 import { Spacing, Radius } from '@/constants/layout';
@@ -34,6 +34,12 @@ export default function CalendarScreen() {
     ...markedDates,
     [selectedDate]: { ...selectedMark, selected: true, selectedColor: Colors.primary },
   };
+
+  useEffect(() => {
+    const start = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+    const end = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+    loadCompletionsForRange(start, end);
+  }, []);
 
   const handleMonthChange = useCallback((month: { dateString: string }) => {
     const d = new Date(month.dateString + 'T00:00:00');

@@ -78,7 +78,11 @@ export default function HomeScreen() {
           <Text style={styles.progressSub}>{completedCount} / {todayRoutines.length} 完了</Text>
         </View>
 
-        <SectionHeader title="今日のルーティン" />
+        <SectionHeader
+          title="今日のルーティン"
+          actionLabel="管理"
+          onAction={() => navigation.navigate('RoutineList')}
+        />
 
         {todayRoutines.length === 0 ? (
           <EmptyState
