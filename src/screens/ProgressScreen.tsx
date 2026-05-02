@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { BarChart } from 'react-native-gifted-charts';
 import { format, subDays, startOfWeek, eachDayOfInterval } from 'date-fns';
 
@@ -21,7 +22,10 @@ const BADGES = [
 
 export default function ProgressScreen() {
   const routines = useRoutineStore((s) => s.routines);
+  const loadRoutines = useRoutineStore((s) => s.loadRoutines);
   const today = new Date();
+
+  useFocusEffect(useCallback(() => { loadRoutines(); }, []));
 
   const weekDays = useMemo(() => {
     const start = startOfWeek(today, { weekStartsOn: 1 });

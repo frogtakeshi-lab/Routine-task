@@ -50,7 +50,8 @@ export function runMigrations(): void {
       completed_todo_count    INTEGER NOT NULL DEFAULT 0,
       achievement_rate        REAL NOT NULL DEFAULT 0
     );
-
-    PRAGMA user_version = ${CURRENT_VERSION};
   `);
+
+  // Set version separately to ensure it's applied outside any implicit transaction
+  db.runSync(`PRAGMA user_version = ${CURRENT_VERSION};`);
 }

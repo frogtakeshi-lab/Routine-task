@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -23,8 +23,11 @@ export default function TodoListScreen() {
   const todos = useTodoStore((s) => s.todos);
   const toggleComplete = useTodoStore((s) => s.toggleComplete);
   const deleteTodo = useTodoStore((s) => s.deleteTodo);
+  const loadTodos = useTodoStore((s) => s.loadTodos);
 
   const [filter, setFilter] = useState<Filter>('active');
+
+  useFocusEffect(useCallback(() => { loadTodos(); }, []));
 
   const filtered = useMemo(() => {
     let list: Todo[];

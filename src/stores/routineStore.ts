@@ -84,9 +84,10 @@ export const useRoutineStore = create<RoutineState>((set, get) => ({
     // Recompute today's achievement
     const today = todayString();
     if (date === today) {
+      // get() now returns the updated state after set()
       const todayCompletions = get().completions[today] ?? [];
       const scheduled = routines.filter((r) => isScheduledOn(r, new Date()));
-      const completedCount = todayCompletions.length + (existing ? 0 : 1) - (existing ? 1 : 0);
+      const completedCount = todayCompletions.length;
       const rate = scheduled.length > 0 ? completedCount / scheduled.length : 0;
       progressRepo.upsertDailyAchievement({
         date: today,

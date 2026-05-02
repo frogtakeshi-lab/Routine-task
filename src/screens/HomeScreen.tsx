@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -27,7 +27,18 @@ export default function HomeScreen() {
   const routines = useRoutineStore((s) => s.routines);
   const completions = useRoutineStore((s) => s.completions);
   const toggleCompletion = useRoutineStore((s) => s.toggleCompletion);
+  const loadRoutines = useRoutineStore((s) => s.loadRoutines);
+  const loadCompletionsForRange = useRoutineStore((s) => s.loadCompletionsForRange);
+  const loadTodos = useTodoStore((s) => s.loadTodos);
   const todos = useTodoStore((s) => s.todos);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadRoutines();
+      loadTodos();
+      loadCompletionsForRange(today, today);
+    }, [today]),
+  );
 
   const todayRoutines = useMemo(
     () => routines.filter((r) => isScheduledOn(r, new Date())),
